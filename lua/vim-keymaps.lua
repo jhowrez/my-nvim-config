@@ -28,3 +28,13 @@ vim.api.nvim_create_autocmd('BufWritePre', {
     require('stylua').format()
   end,
 })
+
+-- Golang
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'go' },
+  callback = function()
+    vim.keymap.set('n', '<leader>sf', function()
+      vim.cmd ':GoFillStruct'
+    end)
+  end,
+})
