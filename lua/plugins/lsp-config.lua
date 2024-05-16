@@ -25,8 +25,6 @@ return {
     'neovim/nvim-lspconfig',
     dependencies = { 'ray-x/lsp_signature.nvim' },
     config = function()
-      local lspconfig = require 'lspconfig'
-      lspconfig.gopls.setup {}
       require('lsp_signature').setup {
         bind = true, -- This is mandatory, otherwise border config won't get registered.
         handler_opts = {
@@ -54,28 +52,43 @@ return {
     end,
   },
   {
-    'ray-x/go.nvim',
+    'fatih/vim-go',
     dependencies = {
-      'ray-x/guihua.lua',
-      'neovim/nvim-lspconfig',
-      'nvim-treesitter/nvim-treesitter',
+      'SirVer/ultisnips',
       'hrsh7th/nvim-cmp',
     },
+    build = ':GoInstallBinaries',
     config = function()
-      local capabilities = require('cmp_nvim_lsp').default_capabilities(vim.lsp.protocol.make_client_capabilities())
+      local lspconfig = require 'lspconfig'
+      local cmp = require 'cmp'
+      local cmp_nvim_lsp = require 'cmp_nvim_lsp'
+      local capabilities = cmp_nvim_lsp.default_capabilities()
 
-      require('go').setup {
+      local on_attach = function(client, bufnr)
+        local format_sync_grp = vim.api.nvim_create_augroup('goimports', {})
+        vim.api.nvim_create_autocmd('BufWritePre', {
+          pattern = '*.go',
+          callback = function()
+            vim.cmd ':GoFmt'
+          end,
+          group = format_sync_grp,
+        })
+
+        vim.api.nvim_create_autocmd('FileType', {
+          pattern = { 'go' },
+          callback = function()
+            vim.keymap.set('n', '<leader>sf', function()
+              vim.cmd ':GoFillStruct'
+            end)
+          end,
+        })
+      end
+
+      -- lsp config
+      lspconfig.gopls.setup {
         capabilities = capabilities,
+        on_attach = on_attach,
       }
-      vim.api.nvim_create_autocmd('BufWritePre', {
-        pattern = '*.lua',
-        callback = function()
-          require('stylua').format()
-        end,
-      })
     end,
-    event = { 'CmdlineEnter' },
-    ft = { 'go', 'gomod' },
-    build = ':lua require("go.install").update_all_sync()', -- if you need to install/update all binaries
   },
 }

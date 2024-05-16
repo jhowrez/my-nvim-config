@@ -7,12 +7,18 @@ return {
       'hrsh7th/cmp-path',
       'hrsh7th/cmp-nvim-lsp',
       'neovim/nvim-lspconfig',
+      'SirVer/ultisnips',
     },
     config = function()
       local cmp = require 'cmp'
       cmp.setup {
         sources = {
           { name = 'nvim_lsp' },
+        },
+        snippet = {
+          expand = function(args)
+            vim.fn['UltiSnips#Anon'](args.body)
+          end,
         },
         mapping = cmp.mapping.preset.insert {
           ['<C-b>'] = cmp.mapping.scroll_docs(-4),
