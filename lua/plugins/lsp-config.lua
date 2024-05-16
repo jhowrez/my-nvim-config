@@ -26,7 +26,6 @@ return {
     dependencies = { 'ray-x/lsp_signature.nvim' },
     config = function()
       local lspconfig = require 'lspconfig'
-      lspconfig.lua_ls.setup {}
       lspconfig.gopls.setup {}
       require('lsp_signature').setup {
         bind = true, -- This is mandatory, otherwise border config won't get registered.
@@ -45,6 +44,14 @@ return {
   },
   {
     'wesleimp/stylua.nvim',
+    config = function()
+      vim.api.nvim_create_autocmd('BufWritePre', {
+        pattern = '*.lua',
+        callback = function()
+          require('stylua').format()
+        end,
+      })
+    end,
   },
   {
     'ray-x/go.nvim',
@@ -60,6 +67,12 @@ return {
       require('go').setup {
         capabilities = capabilities,
       }
+      vim.api.nvim_create_autocmd('BufWritePre', {
+        pattern = '*.lua',
+        callback = function()
+          require('stylua').format()
+        end,
+      })
     end,
     event = { 'CmdlineEnter' },
     ft = { 'go', 'gomod' },
