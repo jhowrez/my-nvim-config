@@ -21,20 +21,47 @@ vim.keymap.set('n', '<leader>sn', function()
   builtin.find_files { cwd = vim.fn.stdpath 'config' }
 end, { desc = '[S]earch [N]eovim files' })
 
--- Lua
+-- Golang
+-- vim.cmd 'autocmd BufWritePre (InsertLeave?) <buffer> lua vim.lsp.buf.formatting_sync(nil,500)'
+local format_sync_grp = vim.api.nvim_create_augroup('goimports', {})
 vim.api.nvim_create_autocmd('BufWritePre', {
-  pattern = '*.lua',
+  group = format_sync_grp,
+  pattern = '*.go',
   callback = function()
-    require('stylua').format()
+    require('go.format').goimports()
+  end,
+})
+vim.api.nvim_create_autocmd('BufWritePost', {
+  group = format_sync_grp,
+  pattern = '*.go',
+  callback = function()
+    if not vim.wo.diff then
+      local inlay = require 'go.inlay'
+      inlay.disable_inlay_hints(true)
+      inlay.set_inlay_hints()
+    end
   end,
 })
 
--- Golang
+vim.api.nvim_create_autocmd('InsertLeave', {
+  group = format_sync_grp,
+  pattern = { '*.go' },
+  callback = function()
+    do
+      return
+    end
+    vim.lsp.buf.format { async = false }
+  end,
+})
+
 vim.api.nvim_create_autocmd('FileType', {
   pattern = { 'go' },
   callback = function()
     vim.keymap.set('n', '<leader>sf', function()
       vim.cmd ':GoFillStruct'
+    end)
+    vim.keymap.set('n', '<c-f>', function()
+      require('go.format').goimports()
     end)
   end,
 })
