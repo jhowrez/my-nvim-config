@@ -1,6 +1,13 @@
 # Snippets for Go
 
-priority -10
+priority 0
+
+
+snippet errlf "if err != nil { log.Fatal(err) }"
+if err != nil {
+	log.Fatal(err)
+}
+endsnippet
 
 # shorthand variable declaration
 snippet : "v := value"
