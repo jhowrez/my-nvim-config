@@ -61,10 +61,18 @@ return {
         lsp_cfg = true,
         goimports = 'gopls',
         gofmt = 'gofmt',
-        lsp_on_attach = false,
+        lsp_on_attach = function()
+          vim.o.updatetime = 250
+          vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
+            group = vim.api.nvim_create_augroup('float_diagnostic', { clear = true }),
+            callback = function()
+              vim.diagnostic.open_float(nil, { focus = false })
+            end,
+          })
+        end,
         dap_debug = true,
         fillstruct = 'gopls',
-        trouble = true,
+        trouble = false,
         lsp_codelens = true,
         diagnostic = {
           underline = true,
