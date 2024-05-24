@@ -65,3 +65,14 @@ vim.api.nvim_create_autocmd('FileType', {
     end)
   end,
 })
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'go' },
+  callback = function()
+    vim.keymap.set('n', '<leader>tf', function()
+      vim.cmd ':GoAddTag'
+    end)
+    vim.keymap.set('n', '<c-f>', function()
+      require('go.format').goimports()
+    end)
+  end,
+})
