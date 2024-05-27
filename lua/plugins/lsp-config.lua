@@ -9,7 +9,7 @@ return {
     'williamboman/mason-lspconfig.nvim',
     config = function()
       require('mason-lspconfig').setup {
-        ensure_installed = { 'lua_ls', 'gopls' },
+        ensure_installed = { 'lua_ls', 'gopls', 'clangd', 'nil_ls' },
       }
     end,
   },
@@ -27,6 +27,28 @@ return {
     config = function()
       local lspconfig = require 'lspconfig'
       lspconfig.lua_ls.setup {}
+      lspconfig.clangd.setup {}
+
+      local caps = vim.tbl_deep_extend(
+        'force',
+        vim.lsp.protocol.make_client_capabilities(),
+        require('cmp_nvim_lsp').default_capabilities(),
+        -- File watching is disabled by default for neovim.
+        -- See: https://github.com/neovim/neovim/pull/22405
+        { workspace = { didChangeWatchedFiles = { dynamicRegistration = true } } }
+      )
+      lspconfig.nil_ls.setup {
+        autostart = true,
+        capacabilities = caps,
+        settings = {
+          ['nil'] = {
+            testSetting = 42,
+            formatting = {
+              command = { 'nixpkgs-fmt' },
+            },
+          },
+        },
+      }
       vim.keymap.set('n', 'K', vim.lsp.buf.hover, {})
       vim.keymap.set('n', 'gd', vim.lsp.buf.definition, {})
       vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, {})
